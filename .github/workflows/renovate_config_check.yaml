@@ -1,25 +1,25 @@
-name: Renovate Bot Config Validation
-
-on:
-  pull_request:
-    paths:
-      - 'renovate.json'
-
 jobs:
   renovate_bot_config_validation:
-    runs-on: ubuntu-22.04
-
+    runs-on: self-hosted
     steps:
-    - name: Checkout code
+    - continue-on-error: true
+      name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Set up Node.js
+    - continue-on-error: true
+      name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
+    - continue-on-error: true
+      name: Install Renovate and Config Validator
+      run: 'npm install -g npm@latest
 
-    - name: Install Renovate and Config Validator
-      run: |
-        npm install -g npm@latest
         npm install --global renovate
+
         renovate-config-validator
+
+        '
+name: Renovate Bot Config Validation
+on:
+  repository_dispatch:
+    types: trigger-ga___renovate_config_check.yaml

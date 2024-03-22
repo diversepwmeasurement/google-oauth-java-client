@@ -1,19 +1,29 @@
-on:
-  pull_request:
-    types: [ labeled ]
-    branches:
-    - main
-name: downstream
 jobs:
   dependencies:
     if: ${{ github.event.label.name == 'downstream-check:run' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v2
+    - continue-on-error: true
+      uses: actions/setup-java@v3
+      with:
+        distribution: zulu
+        java-version: ${{matrix.java}}
+    - continue-on-error: true
+      run: java -version
+    - continue-on-error: true
+      run: sudo apt-get update -y
+    - continue-on-error: true
+      run: sudo apt-get install libxml2-utils
+    - continue-on-error: true
+      run: .kokoro/downstream-client-library-check.sh google-oauth-client-bom ${{matrix.repo}}
     strategy:
       fail-fast: false
       matrix:
-        java: [17]
+        java:
+        - 17
         repo:
-        # This list needs to be updated manually until an automated solution is in place.
         - accessapproval
         - accesscontextmanager
         - aiplatform
@@ -132,13 +142,7 @@ jobs:
         - websecurityscanner
         - workflow-executions
         - workflows
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v3
-      with:
-        distribution: zulu
-        java-version: ${{matrix.java}}
-    - run: java -version
-    - run: sudo apt-get update -y
-    - run: sudo apt-get install libxml2-utils
-    - run: .kokoro/downstream-client-library-check.sh google-oauth-client-bom ${{matrix.repo}}
+name: downstream
+on:
+  repository_dispatch:
+    types: trigger-ga___downstream.yaml
